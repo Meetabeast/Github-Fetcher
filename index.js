@@ -2,7 +2,7 @@ import axios from "axios";
 import inquirer from "inquirer";
 import { execSync } from "child_process"
 
-async function run2() {
+async function run() {
     try {
         let { repositoryType } = await inquirer.prompt([
             {
@@ -81,6 +81,8 @@ async function run2() {
             }
         });
     } catch (error) {
-        
+        console.log('A Error Occurred', error.message)
     }
 }
+
+run();

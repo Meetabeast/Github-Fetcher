@@ -4,63 +4,17 @@ import { execSync } from "child_process"
 
 async function run() {
     try {
-        let { repositoryType } = await inquirer.prompt([
+        const { username } = await inquirer.prompt([
             {
-                type: 'list',
-                name: 'repositoryType',
-                message: 'Select the type of repository.',
-                choices: ['Public', 'Private'],
+                type: 'input',
+                name: 'username',
+                message: 'Enter your github username:',
             },
         ]);
-
-        repositoryType = repositoryType.toLowerCase();
-        
-        let repositories;
-
-        switch(repositoryType) {
-            case "public": {
-                const { username } = await inquirer.prompt([
-                    {
-                        type: 'input',
-                        name: 'username',
-                        message: 'Enter your github username:',
-                    },
-                ]);
-        
-                const response = await axios.get(`https://api.github.com/users/${username}/repos`);
-                repositories = response.data;
-            }
-            break;
-            case "private": {
-                const credentials = await inquirer.prompt([
-                    {
-                        type: 'input',
-                        name: 'username',
-                        message: 'Enter your GitHub username:',
-                    },
-                    {
-                        type: 'password',
-                        name: 'token',
-                        message: 'Enter your Personal Access Token:',
-                    },
-                ]);
-
-                const responsePrivate = await axios.get('https://api.github.com/user/repos', {
-                    auth: {
-                        username: credentials.username,
-                        password: credentials.token,
-                    },
-                });
-
-                repositories = responsePrivate.data;
-            }
-            break;
-            default: {
-                console.error('Invalid repository type selected.');
-                return;
-            }
-        }
-
+    
+        const response = await axios.get(`https://api.github.com/users/${username}/repos`);
+        let repositories = response.data;
+    
         const { repository } = await inquirer.prompt([
             {
                 type: 'list',
@@ -69,9 +23,9 @@ async function run() {
                 choices: repositories.map(repo => ({ name: repo.name, value: repo })),
             },
         ]);
-
+    
         const repoInfo = await axios.get(repository.url);
-
+    
         execSync(`git clone ${repoInfo.data.clone_url} ${repoInfo.data.name}`, (error, stdout, stderr) => {
             if (error) {
                 console.error('Error cloning repository', error.message);
@@ -81,7 +35,7 @@ async function run() {
             }
         });
     } catch (error) {
-        console.log('A Error Occurred', error.message)
+        console.log('A Error occured: ', error.message)
     }
 }
 
